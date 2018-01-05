@@ -1,0 +1,189 @@
+@{
+    Layout = null;
+}
+@inherits System.Web.Mvc.WebViewPage
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+</head>
+<body>
+    <pre>1 - Started with ASP.NET Web Application (.NET Framework) with "Empty" as the project template and with no checkboxes checked for "Add folders and core references for:"
+
+        Solution file folder has two folders:
+
+         * A packages folder, which has the following folders:
+ 	        - Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.7
+ 	        - Microsoft.Net.Compilers.2.1.0
+
+         * And a project folder, which has the following folders and files:
+
+	        - Folders:
+                - The bin folder which just has the following file in it:
+ 		            -- Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+	            - The obj folder which just has the Debug folder in it for debug information in subsequent subfolders
+	            - The Properties folder which just has the AssemblyInfo.cs file in it
+	        - Files:
+		        -- project name file (MVC_FromScratch_By_Add_DLL.csproj)
+		        -- project name user file (MVC_FromScratch_By_Add_DLL.csproj.user)
+		        -- packages.config (just had the followiing)<!--
+                    <package id="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" version="1.0.7" targetFramework="net461" />
+                    <package id="Microsoft.Net.Compilers" version="2.1.0" targetFramework="net461" developmentDependency="true" />-->        
+		    -- Web.config (just had the followiing)<!--
+                      <?xml version="1.0" encoding="utf-8"?>
+                      For more information on how to configure your ASP.NET application, please visit
+                      https://go.microsoft.com/fwlink/?LinkId=169433
+                     <configuration>
+                      <system.web>
+                        <compilation debug="true" targetFramework="4.6.1"/>
+                        <httpRuntime targetFramework="4.6.1"/>
+                      </system.web>
+                      <system.codedom>
+                        <compilers>
+                          <compiler language="c#;cs;csharp" extension=".cs"
+                            type="Microsoft.CodeDom.Providers.DotNetCompilerPlatform.CSharpCodeProvider, Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"
+                            warningLevel="4" compilerOptions="/langversion:default /nowarn:1659;1699;1701"/>
+                          <compiler language="vb;vbs;visualbasic;vbscript" extension=".vb"
+                            type="Microsoft.CodeDom.Providers.DotNetCompilerPlatform.VBCodeProvider, Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"
+                            warningLevel="4" compilerOptions="/langversion:default /nowarn:41008 /define:_MYTYPE=\&quot;Web\&quot; /optionInfer+"/>
+                        </compilers>
+                      </system.codedom>
+                    </configuration>-->        
+		    -- Web.Debug.config
+		    -- Web.Release.config
+    
+    </pre>
+    <pre>2 - Copied the DLLs that are needed for MVC from another "Empty" project (where the Mvc package was installed from the Package Manager Console: Install-Package Microsoft.AspNet.Mvc) 
+        into this project's bin folder and then added them to the References section as follows:
+
+        DLLs:
+                01/28/2015 System.Web.Helpers.dll
+                01/28/2015 System.Web.Mvc.dll
+                01/28/2015 System.Web.Razor.dll
+                01/28/2015 System.Web.WebPages.Deployment.dll
+                01/28/2015 System.Web.WebPages.dll
+                01/28/2015 System.Web.WebPages.Razor.dll
+        References:
+                System.Web.Helpers, Version=3.0.0.0
+                System.Web.Mvc, Version=5.2.3.0
+                System.Web.Razor, Version=3.0.0.0
+                System.Web.WebPages, Version=3.0.0.0
+                System.Web.WebPages.Deployment, Version=3.0.0.0
+                System.Web.WebPages.Razor, Version=3.0.0.0           
+    </pre>
+
+    <pre>3 - Added RouteConfig.cs for routing configuration
+
+                1 - Created folder: App_Start
+
+                2 - Added a blank class file under folder for routing: RouteConfig.cs
+            
+                3 - Added 2 usings at the top: 
+
+                        using System.Web.Mvc;
+                        using System.Web.Routing;
+
+                4 - Removed the appended folder name from the namespace (".App_Start") so that other classes can see it. 
+                (such as the class in Global.asax that calls the method in this class)
+
+                5 - Added RegisterRoutes method for assigning the value of the "MapRoute" property of the "RouteCollection" 
+                that will be passed in at startup from the Global.asx startup event.
+
+                    public static void RegisterRoutes(RouteCollection routes)
+                    {
+                        routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+
+                        routes.MapRoute(
+                            name: "Default",
+                            url: "{controller}/{action}/{id}",
+                            defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
+                        );
+                    }
+
+    </pre>
+
+    <pre>4 - Added a global.asx file to launch the RegisterRoutes method defined above in the RouteConfig.cs file, passing the RouteTable.Routes object to it at startup
+        
+                1 - Needed to add 1 using at the top: 
+        
+                    using System.Web.Routing;
+
+                2 - Added the call to the RouteConfig method call in the Application_Start() method. 
+                All code inside the namespace should look like this (Deleted all of the other events in the file).
+
+                    - code:     public class MvcApplication : System.Web.HttpApplication
+                                {
+                                    protected void Application_Start(object sender, EventArgs e)
+                                    {
+                                        RouteConfig.RegisterRoutes(RouteTable.Routes);
+                                    }
+                                }
+
+                    - Passed the RouteTable.Routes object (built in obj from System.Web.Routing) - repository for all the routes in the "RouteCollection" collection referenced above) to the method 
+
+                    - Changed the class type from Global to MvcApplication and kept the inheritance the same from System.Web.HttpApplication.
+    
+
+                3 - This is all that was done to the file at 1st, but it crashed because it could not find the Global type that was originally specified. 
+                This was because the markup for this file had to be edited to inherit from the new class type not Global. 
+
+                    So edited the markup (right-clicked on file name, selected view markup) to inherit from MvcApplication vs Global
+    </pre>
+
+    <pre>5 - Added the HomeController.cs file to create the Controller
+
+                1 - Created the following folder:
+                            - Controllers        
+
+                2 - Added the HomeController.cs (added as a blank class file) in this folder.
+
+                    The prefix name is Home, to match the Controller name that was registered for the Default route in RouteCOnfig.
+
+                    - Controllers\HomeController.cs (added as a blank class file); added the following:
+
+                                ? Remove the parent folder name that was appended to the namespace ?
+        
+                                Needed to add 1 using at the top:
+                                        using System.Web.Mvc;
+
+                                - Added the Controller class to be inherited by the HomeController class
+                                - Added the method called Index() (matching the same name as what was passed to the route collection above)
+                                - Set the type of the Index() method as "ActionResult"
+                                - The return View() method did not need parameters since it will automatically look for the razor file with the same name as its containing method;
+                                but passed in the name of the file anyway, so that the master page (_LayoutPage1) can load as its container.
+                                - The following is what it should look like.
+
+                                public class HomeController : Controller
+                                {
+                                    public ActionResult Index()
+                                    {
+                                        ViewBag.Message = "Modify this template to jump-start your ASP.NET MVC application.";
+
+                                        return View("Index", "_LayoutPage1");
+                                    }
+                                }
+
+    </pre>
+
+    <pre>6 - Added the razor pages to be managed by the router ... HOWEVER!!!! ... added these files outside of the project in windows explorer and then 
+        came back to VS to then "Include in Project" (the selection to pick from right clicking on the file in Solution Explorer where "Show all files" is set).
+        Did it this way because when adding a new Razor View page through the normal right clicking on folder and add process the packages for MVC get installed 
+        along with writing the reference to each one in the package.config file.
+
+                1 - Created the following folders:
+                    - Views\Home        
+                    - Views\Shared
+
+                    - Views\Home\Index.cshtml (would normally add as a new MVC 5 View Page (Razor) from the C#/Web new item wizard)        
+                    - Views\Shared\_LayoutPage1.cshtml (would normally add as a new MVC 5 Layout Page (Razor) from the C#/Web new item wizard) to add the master page to the project
+
+                            Added the following at the top to the Index and _LayoutPage1 razor files
+
+                                -  (at sign)inherits System.Web.Mvc.WebViewPage (this was added at the top after the other directive) 
+    
+    </pre>
+</body>
+</html>
